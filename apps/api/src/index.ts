@@ -5,6 +5,7 @@ import { prisma } from '@clawcloud/db';
 import { DopplerMockService } from './services/apiKeyService';
 import { initSocket, broadcastTokenUsage } from './services/socketService';
 import { TelegramService } from './services/telegramService';
+import { dashboardRoutes } from './routes/dashboard';
 
 dotenv.config();
 
@@ -15,6 +16,8 @@ const fastify = Fastify({
 fastify.register(cors, {
   origin: '*'
 });
+
+fastify.register(dashboardRoutes);
 
 fastify.get('/', async (request, reply) => {
   return { hello: 'ClawCloud API running' };

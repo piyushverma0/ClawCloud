@@ -46,6 +46,7 @@ var db_1 = require("@clawcloud/db");
 var apiKeyService_1 = require("./services/apiKeyService");
 var socketService_1 = require("./services/socketService");
 var telegramService_1 = require("./services/telegramService");
+var dashboard_1 = require("./routes/dashboard");
 dotenv_1.default.config();
 var fastify = (0, fastify_1.default)({
     logger: true
@@ -53,6 +54,7 @@ var fastify = (0, fastify_1.default)({
 fastify.register(cors_1.default, {
     origin: '*'
 });
+fastify.register(dashboard_1.dashboardRoutes);
 fastify.get('/', function (request, reply) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         return [2 /*return*/, { hello: 'ClawCloud API running' }];

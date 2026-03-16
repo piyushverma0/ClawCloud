@@ -30,6 +30,8 @@ model Instance {
   status       String   @default("STOPPED") // STOPPED, RUNNING, ERROR
   openclawKey  String?  // Will store the API Key (should be hashed/encrypted in prod)
   hostUrl      String?
+  soulProfile  Json?    // Stores Name, Personality, Goals, Constraints
+  
   
   userId       String
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -38,6 +40,11 @@ model Instance {
   updatedAt    DateTime @updatedAt
   
   tokenUsages  TokenUsage[]
+  memories     Memory[]
+  channels     Channel[]
+  cronJobs     CronJob[]
+  skills       Skill[]
+  sessionLogs  SessionLog[]
 }
 
 model TokenUsage {
@@ -52,6 +59,61 @@ model TokenUsage {
   userId       String
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
+  instanceId  String
+  instance    Instance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+}
+
+model Memory {
+  id          String   @id @default(cuid())
+  role        String   // "user", "agent", "system"
+  content     String
+  createdAt   DateTime @default(now())
+
+  instanceId  String
+  instance    Instance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+}
+
+model Channel {
+  id          String   @id @default(cuid())
+  platform    String   // "telegram", "discord", "slack", "signal"
+  token       String?  // The integration API token (should be encrypted in prod)
+  isActive    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  instanceId  String
+  instance    Instance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+}
+
+model CronJob {
+  id          String   @id @default(cuid())
+  name        String
+  schedule    String   // Cron expression "0 8 * * *"
+  action      String
+  status      String   @default("ACTIVE") // ACTIVE, PAUSED
+  lastRunAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  instanceId  String
+  instance    Instance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+}
+
+model Skill {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  installedAt DateTime @default(now())
+
+  instanceId  String
+  instance    Instance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+}
+
+model SessionLog {
+  id          String   @id @default(cuid())
+  level       String   // "INFO", "WARN", "ERROR"
+  message     String
+  createdAt   DateTime @default(now())
+
   instanceId  String
   instance    Instance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
 }
