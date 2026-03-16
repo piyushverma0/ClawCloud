@@ -1,12 +1,19 @@
 import Fastify from 'fastify';
+import cors from '@fastify/cors';
 import dotenv from 'dotenv';
 import { prisma } from '@clawcloud/db';
 import { DopplerMockService } from './services/apiKeyService';
+import { initSocket, broadcastTokenUsage } from './services/socketService';
+import { TelegramService } from './services/telegramService';
 
 dotenv.config();
 
 const fastify = Fastify({
   logger: true
+});
+
+fastify.register(cors, {
+  origin: '*'
 });
 
 fastify.get('/', async (request, reply) => {
@@ -22,10 +29,70 @@ fastify.get('/api/instances', async (request, reply) => {
 // Mock endpoint to register usage
 fastify.post('/api/instances/:id/usage', async (request, reply) => {
   const { id } = request.params as { id: string };
-  const { tokensUsed, cost } = request.body as { tokensUsed: number; cost: number };
+  const { tokensUsed, inputTokens = 0, outputTokens = 0, costUsd = 0, metadata = null } 
+    = request.body as any; // Using any for fast prototyping, in reality use TypeBox
   
-  // Here we would validate the instance exists and add usage
-  return { status: 'recorded' };
+  // Find instance to get userId
+  const instance = await prisma.instance.findUnique({
+    where: { id },
+    include: { user: true }
+  });
+
+  if (!instance) {
+    return reply.status(404).send({ error: 'Instance not found' });
+  }
+
+  // Save usage record
+  const usageRecord = await prisma.tokenUsage.create({
+    data: {
+      tokensUsed,
+      inputTokens,
+      outputTokens,
+      costUsd,
+      metadata,
+      instanceId: id,
+      userId: instance.userId,
+    }
+  });
+
+  // Calculate today's total cost for this user
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const todaysUsages = await prisma.tokenUsage.findMany({
+    where: {
+      userId: instance.userId,
+      date: { gte: today }
+    }
+  });
+  
+  const totalCostToday = todaysUsages.reduce((sum: number, u: { costUsd: number }) => sum + u.costUsd, 0);
+
+  // Broadcast real-time update
+  broadcastTokenUsage(id, {
+    newRecord: usageRecord,
+    totalCostToday
+  });
+
+  // Check budget limits
+  const budget = instance.user.dailyBudget || 0;
+  if (budget > 0) {
+    if (totalCostToday > budget) {
+      await TelegramService.sendBudgetAlert(
+        instance.user.telegramHandle || '',
+        instance.name,
+        totalCostToday,
+        budget
+      );
+    }
+    
+    // Auto-pruning flag
+    if (totalCostToday > budget * 0.8) {
+       return { status: 'recorded', pruneRecommended: true };
+    }
+  }
+
+  return { status: 'recorded', pruneRecommended: false };
 });
 
 fastify.post('/api/instances/:id/rotate-key', async (request, reply) => {
@@ -42,6 +109,10 @@ fastify.post('/api/instances/:id/rotate-key', async (request, reply) => {
 const start = async () => {
   try {
     const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
+    
+    // Initialize Socket.io attached to the fastify server
+    initSocket(fastify.server);
+    
     await fastify.listen({ port, host: '0.0.0.0' });
     console.log(`Server listening at http://localhost:${port}`);
   } catch (err) {

@@ -10,7 +10,9 @@
   "dependencies": {
     "@clawcloud/db": "workspace:*",
     "fastify": "^4.26.2",
-    "dotenv": "^16.4.5"
+    "@fastify/cors": "^9.0.1",
+    "dotenv": "^16.4.5",
+    "socket.io": "^4.7.5"
   },
   "devDependencies": {
     "@clawcloud/typescript-config": "workspace:*",
