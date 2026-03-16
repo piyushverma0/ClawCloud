@@ -1,0 +1,22 @@
+{
+    # Global options
+    email admin@clawcloud.local # Replace with real email in prod
+}
+
+# The main dashboard interface
+# In production, replace localhost with your actual domain
+localhost {
+    # Proxy all traffic to the Next.js web app
+    reverse_proxy web:3000
+}
+
+# The API interface (optional if handled through the web app, but good for direct API access)
+api.localhost {
+    reverse_proxy api:3001
+}
+
+# The actual OpenClaw Gateway (proxied through the dashboard or accessed directly if needed, but normally isolated)
+# For the sake of the exercise, we proxy it to demonstrat the hardened auth.
+openclaw.localhost {
+    reverse_proxy openclaw:3001
+}

@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@db:5432/clawcloud}
+      - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+    networks:
+      - clawcloud-net
+    depends_on:
+      - db
+    # In production, web shouldn't be exposed directly, but behind the proxy
+    # For dev, we might map 3000:3000
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@db:5432/clawcloud}
+    networks:
+      - clawcloud-net
+    depends_on:
+      - db
+
+  openclaw:
+    build:
+      context: ./docker/openclaw
+    environment:
+      - OPENCLAW_API_KEY=${OPENCLAW_API_KEY:-dev_key}
+    networks:
+      - clawcloud-net
+    restart: unless-stopped
+
+  proxy:
+    build:
+      context: ./docker/proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - clawcloud-net
+    depends_on:
+      - web
+      - openclaw
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=clawcloud
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - clawcloud-net
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
+
+networks:
+  clawcloud-net:
+    driver: bridge

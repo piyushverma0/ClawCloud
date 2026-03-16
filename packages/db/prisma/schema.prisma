@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique // Auth ID from Clerk
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  instances   Instance[]
+  tokenUsages TokenUsage[]
+}
+
+model Instance {
+  id           String   @id @default(cuid())
+  name         String
+  status       String   @default("STOPPED") // STOPPED, RUNNING, ERROR
+  openclawKey  String?  // Will store the API Key (should be hashed/encrypted in prod)
+  hostUrl      String?
+  
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  tokenUsages  TokenUsage[]
+}
+
+model TokenUsage {
+  id          String   @id @default(cuid())
+  tokensUsed  Int
+  cost        Float    // Estimated cost
+  date        DateTime @default(now())
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  instanceId  String
+  instance    Instance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+}
