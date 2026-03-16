@@ -8,14 +8,14 @@ export class DopplerMockService {
    * Generates a secure, random API key of 64 characters
    */
   static generateApiKey(): string {
-    return \`claw_\${crypto.randomBytes(32).toString('hex')}\`;
+    return `claw_${crypto.randomBytes(32).toString('hex')}`;
   }
 
   /**
    * Simulates storing the API key securely in Doppler
    */
   static async storeInstanceKey(instanceId: string, apiKey: string): Promise<boolean> {
-    console.log(\`[Doppler Service Mock] Stored API Key for instance \${instanceId} securely.\`);
+    console.log(`[Doppler Service Mock] Stored API Key for instance ${instanceId} securely.`);
     // In reality, we'd call Doppler API here
     return true;
   }
@@ -26,7 +26,7 @@ export class DopplerMockService {
   static async rotateInstanceKey(instanceId: string): Promise<string> {
     const newKey = this.generateApiKey();
     await this.storeInstanceKey(instanceId, newKey);
-    console.log(\`[Doppler Service Mock] Rotated API Key for instance \${instanceId}.\`);
+    console.log(`[Doppler Service Mock] Rotated API Key for instance ${instanceId}.`);
     return newKey;
   }
 }
