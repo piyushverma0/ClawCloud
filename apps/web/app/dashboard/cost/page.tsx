@@ -2,6 +2,7 @@ import React from 'react';
 import { CostChart } from '@/components/CostChart';
 import { WorkspaceAnalyzer } from '@/components/WorkspaceAnalyzer';
 import { BudgetSettings } from '@/components/BudgetSettings';
+import { SkillAnalytics } from '@/components/SkillAnalytics';
 
 // Assuming we have an active instance
 const MOCK_INSTANCE_ID = "cm6uokn480001y1q908m51p3x"; 
@@ -41,6 +42,7 @@ export default function CostDashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <WorkspaceAnalyzer />
         <BudgetSettings />
+        <SkillAnalytics />
       </div>
     </div>
   );

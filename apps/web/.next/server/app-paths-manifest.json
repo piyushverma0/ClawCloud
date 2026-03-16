@@ -1,13 +1,15 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
+  "/admin/review/page": "app/admin/review/page.js",
   "/page": "app/page.js",
-  "/dashboard/channels/page": "app/dashboard/channels/page.js",
+  "/dashboard/cost/page": "app/dashboard/cost/page.js",
   "/dashboard/memory/page": "app/dashboard/memory/page.js",
-  "/dashboard/cron/page": "app/dashboard/cron/page.js",
-  "/dashboard/health/page": "app/dashboard/health/page.js",
-  "/dashboard/security/page": "app/dashboard/security/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/channels/page": "app/dashboard/channels/page.js",
   "/dashboard/skills/page": "app/dashboard/skills/page.js",
   "/dashboard/soul/page": "app/dashboard/soul/page.js",
-  "/dashboard/cost/page": "app/dashboard/cost/page.js",
-  "/dashboard/page": "app/dashboard/page.js"
+  "/dashboard/skills/submit/page": "app/dashboard/skills/submit/page.js",
+  "/dashboard/cron/page": "app/dashboard/cron/page.js",
+  "/dashboard/health/page": "app/dashboard/health/page.js",
+  "/dashboard/security/page": "app/dashboard/security/page.js"
 }

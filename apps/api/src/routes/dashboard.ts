@@ -89,16 +89,35 @@ export async function dashboardRoutes(fastify: FastifyInstance) {
 
   fastify.post('/api/instances/:id/skills', async (request, reply) => {
     const { id } = request.params as { id: string };
-    const { name, description } = request.body as any;
+    const { name, description, registryId } = request.body as any;
+
+    if (registryId) {
+       // Increment install count on the registry
+       await prisma.skillRegistry.update({
+         where: { id: registryId },
+         data: { installs: { increment: 1 } }
+       });
+    }
+
     return await prisma.skill.create({
-      data: { instanceId: id, name, description }
+      data: { instanceId: id, name, description, registryId }
     });
   });
 
   fastify.delete('/api/instances/:id/skills/:skillId', async (request, reply) => {
     const { skillId } = request.params as { skillId: string };
+    
+    // Decrease install count? Keeping it simple for now or maybe we don't decrement on uninstall.
     await prisma.skill.delete({ where: { id: skillId } });
     return { success: true };
+  });
+
+  fastify.get('/api/instances/:id/skills/usage', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    return await prisma.skillUsage.findMany({
+       where: { instanceId: id },
+       include: { registry: true }
+    });
   });
 
   // 6. Session Health (Logs)

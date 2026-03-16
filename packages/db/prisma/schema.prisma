@@ -45,6 +45,7 @@ model Instance {
   cronJobs     CronJob[]
   skills       Skill[]
   sessionLogs  SessionLog[]
+  skillUsages  SkillUsage[]
 }
 
 model TokenUsage {
@@ -106,6 +107,9 @@ model Skill {
 
   instanceId  String
   instance    Instance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+
+  registryId  String?
+  registry    SkillRegistry? @relation(fields: [registryId], references: [id])
 }
 
 model SessionLog {
@@ -116,4 +120,46 @@ model SessionLog {
 
   instanceId  String
   instance    Instance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+}
+
+model SkillRegistry {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String
+  author      String
+  repoUrl     String
+  isVerified  Boolean  @default(false)
+  safetyScore Int?     // 0-100
+  installs    Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  installedSkills Skill[]
+  usages          SkillUsage[]
+}
+
+model SkillReview {
+  id          String   @id @default(cuid())
+  skillName   String
+  description String
+  repoUrl     String
+  submitterId String
+  safetyScore Int?     // 0-100
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  reportJson  Json?    // Detailed safety scorer report
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SkillUsage {
+  id          String   @id @default(cuid())
+  invocations Int      @default(0)
+  tokensUsed  Int      @default(0)
+  costUsd     Float    @default(0)
+  date        DateTime @default(now())
+
+  instanceId  String
+  instance    Instance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+
+  registryId  String
+  registry    SkillRegistry @relation(fields: [registryId], references: [id], onDelete: Cascade)
 }

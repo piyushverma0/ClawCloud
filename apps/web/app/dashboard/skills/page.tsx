@@ -1,26 +1,26 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Download, Check, ExternalLink, Search } from 'lucide-react';
+import { Download, Check, ExternalLink, Search, Plus } from 'lucide-react';
+import Link from 'next/link';
 
 const MOCK_INSTANCE_ID = "cm6uokn480001y1q908m51p3x";
 
-// Mock public registry of skills
-const SKILL_REGISTRY = [
-  { id: 'sk-github', name: 'GitHub Integration', desc: 'Read PRs, create issues, and review code automatically.', installs: '12k' },
-  { id: 'sk-notion', name: 'Notion Sync', desc: 'Append generated summaries to your Notion databases.', installs: '8.4k' },
-  { id: 'sk-weather', name: 'Weather API', desc: 'Allow the agent to look up real-time weather data.', installs: '2.1k' },
-  { id: 'sk-calendar', name: 'Google Calendar', desc: 'Read availability and schedule events via natural language.', installs: '15k' },
-];
-
 export default function SkillInstaller() {
+  const [registrySkills, setRegistrySkills] = useState<any[]>([]);
   const [installedSkills, setInstalledSkills] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [processing, setProcessing] = useState<string | null>(null);
 
   useEffect(() => {
     fetchInstalled();
+    fetchRegistry();
   }, []);
+
+  const fetchRegistry = async () => {
+    const res = await fetch('/api/marketplace/skills');
+    if(res.ok) setRegistrySkills(await res.json());
+  };
 
   const fetchInstalled = async () => {
     const res = await fetch(`/api/instances/${MOCK_INSTANCE_ID}/skills`);
@@ -32,7 +32,7 @@ export default function SkillInstaller() {
     await fetch(`/api/instances/${MOCK_INSTANCE_ID}/skills`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: skill.name, description: skill.desc })
+      body: JSON.stringify({ name: skill.name, description: skill.description, registryId: skill.id })
     });
     setTimeout(() => {
       fetchInstalled();
@@ -52,16 +52,24 @@ export default function SkillInstaller() {
     }, 800);
   };
 
-  const filteredRegistry = SKILL_REGISTRY.filter(s => 
+  const filteredRegistry = registrySkills.filter(s => 
     s.name.toLowerCase().includes(search.toLowerCase()) || 
-    s.desc.toLowerCase().includes(search.toLowerCase())
+    (s.description && s.description.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (
     <div className="max-w-5xl mx-auto py-8 px-4">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white tracking-tight">Skill Marketplace</h1>
-        <p className="mt-2 text-slate-400">Give your agent new capabilities with one-click installations.</p>
+      <div className="flex justify-between items-end mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-white tracking-tight">Skill Marketplace</h1>
+          <p className="mt-2 text-slate-400">Give your agent new capabilities from our vetted community registry.</p>
+        </div>
+        <Link 
+          href="/dashboard/skills/submit"
+          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white py-2 px-4 rounded-md transition-colors text-sm"
+        >
+          <Plus size={16} /> Submit Skill
+        </Link>
       </div>
 
       <div className="relative mb-8">
@@ -90,13 +98,13 @@ export default function SkillInstaller() {
               </div>
               
               <p className="text-slate-400 text-sm mb-8 flex-1 leading-relaxed">
-                {skill.desc}
+                {skill.description}
               </p>
               
               <div className="mt-auto flex justify-between items-center">
-                <button className="text-emerald-500 hover:text-emerald-400 text-sm font-medium flex items-center gap-1">
+                <a href={skill.repoUrl} target="_blank" rel="noreferrer" className="text-emerald-500 hover:text-emerald-400 text-sm font-medium flex items-center gap-1">
                   View Source <ExternalLink size={14} />
-                </button>
+                </a>
                 
                 {isInstalled ? (
                   <button 

@@ -193,16 +193,26 @@ function dashboardRoutes(fastify) {
                 });
             }); });
             fastify.post('/api/instances/:id/skills', function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                var id, _a, name, description;
+                var id, _a, name, description, registryId;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
                             id = request.params.id;
-                            _a = request.body, name = _a.name, description = _a.description;
-                            return [4 /*yield*/, db_1.prisma.skill.create({
-                                    data: { instanceId: id, name: name, description: description }
+                            _a = request.body, name = _a.name, description = _a.description, registryId = _a.registryId;
+                            if (!registryId) return [3 /*break*/, 2];
+                            // Increment install count on the registry
+                            return [4 /*yield*/, db_1.prisma.skillRegistry.update({
+                                    where: { id: registryId },
+                                    data: { installs: { increment: 1 } }
                                 })];
-                        case 1: return [2 /*return*/, _b.sent()];
+                        case 1:
+                            // Increment install count on the registry
+                            _b.sent();
+                            _b.label = 2;
+                        case 2: return [4 /*yield*/, db_1.prisma.skill.create({
+                                data: { instanceId: id, name: name, description: description, registryId: registryId }
+                            })];
+                        case 3: return [2 /*return*/, _b.sent()];
                     }
                 });
             }); });
@@ -212,10 +222,26 @@ function dashboardRoutes(fastify) {
                     switch (_a.label) {
                         case 0:
                             skillId = request.params.skillId;
+                            // Decrease install count? Keeping it simple for now or maybe we don't decrement on uninstall.
                             return [4 /*yield*/, db_1.prisma.skill.delete({ where: { id: skillId } })];
                         case 1:
+                            // Decrease install count? Keeping it simple for now or maybe we don't decrement on uninstall.
                             _a.sent();
                             return [2 /*return*/, { success: true }];
+                    }
+                });
+            }); });
+            fastify.get('/api/instances/:id/skills/usage', function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                var id;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            id = request.params.id;
+                            return [4 /*yield*/, db_1.prisma.skillUsage.findMany({
+                                    where: { instanceId: id },
+                                    include: { registry: true }
+                                })];
+                        case 1: return [2 /*return*/, _a.sent()];
                     }
                 });
             }); });

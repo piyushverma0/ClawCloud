@@ -6,6 +6,7 @@ import { DopplerMockService } from './services/apiKeyService';
 import { initSocket, broadcastTokenUsage } from './services/socketService';
 import { TelegramService } from './services/telegramService';
 import { dashboardRoutes } from './routes/dashboard';
+import { marketplaceRoutes } from './routes/marketplace';
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ fastify.register(cors, {
 });
 
 fastify.register(dashboardRoutes);
+fastify.register(marketplaceRoutes);
 
 fastify.get('/', async (request, reply) => {
   return { hello: 'ClawCloud API running' };
