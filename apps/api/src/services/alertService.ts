@@ -11,7 +11,7 @@ export class AlertService {
     }
 
     try {
-      const url = \`https://api.telegram.org/bot\${this.botToken}/sendMessage\`;
+      const url = `https://api.telegram.org/bot${this.botToken}/sendMessage`;
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -19,7 +19,7 @@ export class AlertService {
         },
         body: JSON.stringify({
           chat_id: this.chatId,
-          text: \`🚨 ClawCloud Security Alert 🚨\\n\\n\${message}\`,
+          text: `🚨 ClawCloud Security Alert 🚨\n\n${message}`,
           parse_mode: 'HTML',
         }),
       });
@@ -32,10 +32,10 @@ export class AlertService {
   }
 
   static async notifyAuthFailure(instanceId: string, attemptedIp: string) {
-    await this.sendAlert(\`Multiple authentication failures detected on instance <code>\${instanceId}</code> from IP <code>\${attemptedIp}</code>.\`);
+    await this.sendAlert(`Multiple authentication failures detected on instance <code>${instanceId}</code> from IP <code>${attemptedIp}</code>.`);
   }
 
   static async notifyUnusualActivity(instanceId: string, activityType: string) {
-    await this.sendAlert(\`Unusual API activity (<strong>\${activityType}</strong>) detected on instance <code>\${instanceId}</code>.\`);
+    await this.sendAlert(`Unusual API activity (<strong>${activityType}</strong>) detected on instance <code>${instanceId}</code>.`);
   }
 }
