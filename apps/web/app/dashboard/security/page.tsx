@@ -80,9 +80,9 @@ export default function SecurityAuditPage() {
                 </div>
               </div>
               {item.action && (
-                <button className={\`whitespace-nowrap font-medium py-2 px-4 rounded-lg shadow-sm transition-colors flex items-center gap-2 text-sm \${
+                <button className={`whitespace-nowrap font-medium py-2 px-4 rounded-lg shadow-sm transition-colors flex items-center gap-2 text-sm ${
                   item.status === 'FAIL' ? 'bg-rose-100 hover:bg-rose-200 text-rose-700' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                }\`}>
+                }`}>
                   <Wrench className="w-4 h-4" />
                   {item.action}
                 </button>

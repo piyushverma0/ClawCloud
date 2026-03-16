@@ -1,0 +1,3 @@
+{
+  "extends": ["@clawcloud/eslint-config/next.js"]
+}

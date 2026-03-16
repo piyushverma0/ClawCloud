@@ -38,7 +38,7 @@ export default function DashboardPage() {
         {instances.map((instance) => (
           <div key={instance.id} className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="flex items-start gap-4">
-              <div className={\`w-3 h-3 rounded-full mt-2 \${instance.status === 'RUNNING' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-slate-300'}\`}></div>
+              <div className={`w-3 h-3 rounded-full mt-2 ${instance.status === 'RUNNING' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-slate-300'}`}></div>
               <div>
                 <h3 className="font-semibold text-lg text-slate-900">{instance.name}</h3>
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-1 text-sm text-slate-500">
